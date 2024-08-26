@@ -129,6 +129,7 @@ def create_agents(env, logger, agent_type, agent_engine, mdp_known=True):
         seller = StriDeAgent(problem_description=env.description_of_problem_class, demo=seller_demo, tool_names=tool_names_bargain_complete_info_single, init_memory=deepcopy(working_memory), llm_validator=False, logger=logger, engine=agent_engine)
         agents = {"buyer":buyer, "seller":seller}
         return agents
+    # TODO: 添加env.name == cartpole的参数设置
 
     elif env.name == "bargain_onesided_uncertainty":
         buyer_demo = load_initial_instructions("envs/bargain_onesided_uncertainty/prompts/buyer_exmps.txt")

@@ -51,7 +51,7 @@ def play_through(env, agents, logger, args):
         elif env.name == "bargain_alternate_singleissue":
             agents["buyer"].reason("Now compute the subgame perfect equilibrium (SPE) step by step.")
             agents["seller"].reason("Now compute the subgame perfect equilibrium (SPE) step by step.")
-
+        # TODO: 添加env.name == cartpole
         metric_ls = []
         state = env.state # initial state
         while not env.is_done: # in case game never ends due to failure in checking terminal condition

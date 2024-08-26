@@ -304,6 +304,7 @@ class StriDeAgent:
                 self.logger.write(err)
                 break
 
+# TODO: 创建一个继承strideagent用于cartpole
 
 class StriDeFlowAgent(StriDeAgent):
     def __init__(self, problem_description, demo, tool_names, init_memory, logger, engine="gpt-3.5-turbo", llm_validator=False) -> None:
