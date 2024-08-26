@@ -63,6 +63,7 @@ def create_env(env_name, random_param, mdp_known):
     elif env_name == "bargain_onesided_uncertainty":
         from envs.bargain_onesided_uncertainty.env import BargainOneSidedUncertainty
         return BargainOneSidedUncertainty(env_param=get_env_param(env_name, random_param))
+    # TODO: 添加cartpole env
 
 def create_agents(env, logger, agent_type, agent_engine, mdp_known=True):
     if env.name == "tabular_mdp" and mdp_known:
@@ -129,7 +130,21 @@ def create_agents(env, logger, agent_type, agent_engine, mdp_known=True):
         seller = StriDeAgent(problem_description=env.description_of_problem_class, demo=seller_demo, tool_names=tool_names_bargain_complete_info_single, init_memory=deepcopy(working_memory), llm_validator=False, logger=logger, engine=agent_engine)
         agents = {"buyer":buyer, "seller":seller}
         return agents
+    
+    elif env.name == "cart_pole":
     # TODO: 添加env.name == cartpole的参数设置
+        controller_demo = load_initial_instructions("envs/cartpole/prompts/controller_exmps.txt")
+        from envs.cartpole.tools import tool_names_cart_pole
+        working_memory = {"P":env.P, "R":env.R, "nState":env.nState, "nAction":env.nAction,
+                          "V": np.zeros((env.epLen,env.nState)),
+                        "Q": np.zeros((env.epLen,env.nState,env.nAction)),}
+        controller = StriDeAgent(problem_description=env.description_of_problem_class, demo=controller_demo, tool_names=tool_names_cart_pole, init_memory=deepcopy(working_memory),llm_validator=False, logger=logger, engine=agent_engine)
+        # TODO：上线之后改成讯飞星火
+        angnts = {"controller": controller}
+        return agents
+        
+        
+        
 
     elif env.name == "bargain_onesided_uncertainty":
         buyer_demo = load_initial_instructions("envs/bargain_onesided_uncertainty/prompts/buyer_exmps.txt")
