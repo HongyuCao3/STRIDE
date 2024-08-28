@@ -1,4 +1,5 @@
 import sys, os
+import numpy as np
 import gym
 from typing import List, Optional
 from pydantic import BaseModel
@@ -42,32 +43,69 @@ class State(BaseModel):
             return False
         
 class CartPole(BaseEnv):
-    def __init__(self, env_param):
+    def __init__(self, env_param,buckets=(1, 1, 6, 12), n_episodes=1000, min_lr=0.1, min_epsilon=0.1,
+                 gamma=1.0, decay=25):
         self.name = "cart_pole"
         self.required_agents = ["controller"]
-        self.env_param = env_param
-        
-        # TODO: 等待设置具体参数
-        
-        self.proposal = {0, 1} 
+        self.buckets = buckets  # Discretization buckets
+        self.n_episodes = n_episodes  # Number of training episodes
+        self.min_lr = min_lr  # Minimum learning rate
+        self.min_epsilon = min_epsilon  # Minimum exploration rate
+        self.gamma = gamma  # Discount factor
+        self.decay = decay  # Decay rate for exploration
+        self.Q = np.zeros(self.buckets + (self.env.action_space.n,))  # Initialize Q-table
+
         # agents can make choice in the set
         self.reset()
         self.description_of_problem_class=description_of_problem_class
         
     def get_description(self, agent_role=None):
         assert agent_role == "controller"
-        description = "Now you are going to play in a cart pole problem, with "
-            # TODO: 设计描述
+        if self.nState <= 10 and self.nAction <= 10 and self.epLen <= 10:
+            P_str = np.array2string(self.P, precision=2, floatmode='fixed')
+            R_str = np.array2string(self.R[:,:,0], precision=2, floatmode='fixed')
+        else:
+            P_str = "stored in working memory. Full matrix is too large to be printed in context history."
+            R_str = "stored in working memory. Full matrix is too large to be printed in context history."
+        description = "Now you are going to play in a finite-horizon cartpole decision process"
         return description
+    
+    def discretize(self, obs):
+        """Discretize continuous state into discrete buckets."""
+        upper_bounds = [
+            self.env.observation_space.high[0],
+            0.5,
+            self.env.observation_space.high[2],
+            np.radians(50)
+        ]
+        lower_bounds = [
+            self.env.observation_space.low[0],
+            -0.5,
+            self.env.observation_space.low[2],
+            -np.radians(50)
+        ]
+        ratios = [(obs[i] + abs(lower_bounds[i])) / (upper_bounds[i] - lower_bounds[i]) for i in range(len(obs))]
+        new_obs = [int(round((self.buckets[i] - 1) * ratios[i])) for i in range(len(obs))]
+        new_obs = [min(self.buckets[i] - 1, max(0, new_obs[i])) for i in range(len(obs))]
+        return tuple(new_obs)
     
     def reset(self):
         # TODO: 根据cartpole重置状态
         self.state = State(time_step=1, cur_agent="controller", actions=self.proposal)
         self.is_done = False
     
-    def step(self, action):
-        # TODO: 根据action更新状态
-        pass
+    def update_q(self, state, action, reward, new_state, alpha):
+        """Update Q-value using the Q-learning update rule."""
+        best_q = np.max(self.Q[new_state])
+        self.Q[state][action] += alpha * (reward + self.gamma * best_q - self.Q[state][action])
+
+    def get_epsilon(self, t):
+        """Calculate decaying epsilon."""
+        return max(self.min_epsilon, min(1, 1.0 - np.log10((t + 1) / self.decay)))
+
+    def get_alpha(self, t):
+        """Calculate decaying learning rate."""
+        return max(self.min_lr, min(0.5, 1.0 - np.log10((t + 1) / self.decay)))
     
      
 if __name__ == "__main__":

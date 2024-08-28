@@ -19,12 +19,14 @@
 ## 解决方案
 
 1. Tools：
-   1. GetQ
-   2. GetArgmax
-   3. UpdateQbyR
+   1. update_q
+   2. get_epsilon
+   3. get_alpha
 2. Q学习
+   1. 在已经确定当前探索的情况下，让LLM依据当前的状态和q矩阵决定探索的方向
+   2. 在不探索的情况下，直接根据q矩阵进行选择
 
 ## 修改内容
 
 1. Agent：开发时使用随机agent，上线使用讯飞agent
-2.
+2. 算法：Q-learing算法

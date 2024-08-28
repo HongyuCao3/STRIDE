@@ -11,6 +11,14 @@ from envs.env_helper import get_env_param
 def play_through(game, agents, logger,):
     assert game.check_agents(agents)
     logger.write(game.description_of_problem_class)
+    
+    for role in agents:
+        instance_description = game.get_description(agent_role=role)
+        logger.write(instance_description)
+        with open(exmps_file, "a") as f:
+            f.write("==== ASSISTANT ====\n")
+            f.write(instance_description+"\n")
+    # TODO:下面写Q学习的步骤
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
