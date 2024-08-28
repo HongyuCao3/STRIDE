@@ -475,7 +475,5 @@ class StriDeFlowAgent(StriDeAgent):
                 break
     
 
-# TODO: 创建一个继承strideagent用于cartpole
-
 
         
