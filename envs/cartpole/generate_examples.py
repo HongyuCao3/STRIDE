@@ -9,7 +9,8 @@ from utils import Logger
 from envs.env_helper import get_env_param
 
 def play_through(game, agents, logger,):
-    pass
+    assert game.check_agents(agents)
+    logger.write(game.description_of_problem_class)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
